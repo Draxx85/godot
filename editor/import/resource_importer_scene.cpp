@@ -1067,6 +1067,10 @@ Node *ResourceImporterScene::_post_fix_animations(Node *p_node, Node *p_root, co
 					}
 				}
 
+				if(anim_settings["settings/remove_duplicated_first_frame"]) {
+					anim->remove_duplicated_first_frame();
+				}
+
 				anim->set_loop_mode(static_cast<Animation::LoopMode>((int)anim_settings["settings/loop_mode"]));
 				bool save = anim_settings["save_to_file/enabled"];
 				String path = anim_settings["save_to_file/path"];
@@ -1638,6 +1642,7 @@ void ResourceImporterScene::get_internal_import_options(InternalImportCategory p
 			r_options->push_back(ImportOption(PropertyInfo(Variant::STRING, "use_external/path", PROPERTY_HINT_FILE, "*.material,*.res,*.tres"), ""));
 		} break;
 		case INTERNAL_IMPORT_CATEGORY_ANIMATION: {
+			r_options->push_back(ImportOption(PropertyInfo(Variant::BOOL, "settings/remove_duplicated_first_frame", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_UPDATE_ALL_IF_MODIFIED), false));
 			r_options->push_back(ImportOption(PropertyInfo(Variant::INT, "settings/loop_mode", PROPERTY_HINT_ENUM, "None,Linear,Pingpong"), 0));
 			r_options->push_back(ImportOption(PropertyInfo(Variant::BOOL, "save_to_file/enabled", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_UPDATE_ALL_IF_MODIFIED), false));
 			r_options->push_back(ImportOption(PropertyInfo(Variant::STRING, "save_to_file/path", PROPERTY_HINT_SAVE_FILE, "*.res,*.tres"), ""));

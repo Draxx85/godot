@@ -5145,6 +5145,78 @@ void Animation::compress(uint32_t p_page_size, uint32_t p_fps, float p_split_tol
 #endif
 }
 
+void Animation::remove_duplicated_first_frame() {
+	double duplicate_time = -1;
+	double new_length = -1;
+
+	for (int track_idx = 0; track_idx < get_track_count(); track_idx++) {
+		int kc = track_get_key_count(track_idx);
+
+		if(kc > 1) {
+			Variant key1 = track_get_key_value(track_idx, 0);
+			Variant key2 = track_get_key_value(track_idx, 1);
+
+			if(key1 == key2) {
+				if(duplicate_time == -1) {
+					duplicate_time = track_get_key_time(track_idx, 1);
+				} else {
+					ERR_FAIL_COND_MSG(duplicate_time != track_get_key_time(track_idx, 1), vformat("Duplicate frame is in different time. Track: %d, key 1, key time: %f, expected duplicate time: %f", track_idx, track_get_key_time(track_idx, 1), duplicate_time));
+				}
+			}
+		}
+	}
+
+	if(duplicate_time == -1) {
+		return;
+	}
+
+	for (int track_idx = 0; track_idx < get_track_count(); track_idx++) {
+		int kc = track_get_key_count(track_idx);
+
+		if(kc > 1) {
+			Variant key1 = track_get_key_value(track_idx, 0);
+			Variant key2 = track_get_key_value(track_idx, 1);
+
+			if(key1 == key2) {
+				track_remove_key(track_idx, 0);
+				kc--;
+			}
+
+			for (int key_idx = 0; key_idx < kc; key_idx++) {
+				double key_time = track_get_key_time(track_idx, key_idx);
+				double new_time = key_time - duplicate_time;
+				track_set_key_time(track_idx, key_idx, new_time);
+
+				if(new_time > new_length) {
+					new_length = new_time;
+				}
+			}
+		} else {
+			double key_time = track_get_key_time(track_idx, 0);
+			if(key_time > duplicate_time) {
+				track_set_key_time(track_idx, 0, key_time - duplicate_time);
+			}
+		}
+	}
+
+	if(new_length != -1) {
+		length = new_length;
+	}
+
+	// Track *track = tracks[trackIdx];
+	// void track_remove_key_at_time(int p_track, double p_time);
+	// int track_get_key_count(int p_track) const;
+	// Variant track_get_key_value(int p_track, int p_key_idx) const;
+	// double track_get_key_time(int p_track, int p_key_idx) const;
+	//
+	// if (track->type == TYPE_POSITION_3D) {
+	// } else if (track->type == TYPE_ROTATION_3D) {
+	// } else if (track->type == TYPE_SCALE_3D) {
+	// } else if (track->type == TYPE_BLEND_SHAPE) {
+	// } else if (track->type == TYPE_VALUE) {
+	// }
+}
+
 bool Animation::_rotation_interpolate_compressed(uint32_t p_compressed_track, double p_time, Quaternion &r_ret) const {
 	Vector3i current;
 	Vector3i next;

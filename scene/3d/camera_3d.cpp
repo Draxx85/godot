@@ -152,7 +152,7 @@ void Camera3D::_notification(int p_what) {
 		case NOTIFICATION_BECAME_CURRENT: {
 			if (viewport) {
 				viewport->find_world_3d()->_register_camera(this);
-				emit_signal(SNAME("on_camera_made_current"));
+				emit_signal(SNAME("on_camera_made_current"), this);
 			}
 		} break;
 
@@ -160,7 +160,7 @@ void Camera3D::_notification(int p_what) {
 			if (viewport) {
 				viewport->find_world_3d()->_remove_camera(this);
 				current = false;
-				emit_signal(SNAME("on_camera_removed_current"));
+				emit_signal(SNAME("on_camera_removed_current"), this);
 			}
 		} break;
 	}
@@ -572,8 +572,8 @@ void Camera3D::_bind_methods() {
 	BIND_ENUM_CONSTANT(DOPPLER_TRACKING_IDLE_STEP);
 	BIND_ENUM_CONSTANT(DOPPLER_TRACKING_PHYSICS_STEP);
 
-	ADD_SIGNAL(MethodInfo("on_camera_made_current"));
-	ADD_SIGNAL(MethodInfo("on_camera_removed_current"));
+	ADD_SIGNAL(MethodInfo("on_camera_made_current", PropertyInfo(Variant::OBJECT, "camera")));
+	ADD_SIGNAL(MethodInfo("on_camera_removed_current", PropertyInfo(Variant::OBJECT, "camera")));
 }
 
 real_t Camera3D::get_fov() const {
